@@ -1,0 +1,12 @@
+# 個人情報・機密は絶対にコミットしない
+sender_profile.json
+*.sa.json
+lovechara-sa.json
+.secrets/
+# 実行時生成物
+diag_candidates.json
+form_results.json
+map_*.json
+map_current.json
+pw_shots/
+__pycache__/
