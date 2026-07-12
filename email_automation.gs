@@ -12,6 +12,8 @@
  * - 業界カテゴリごとの件名・本文を最新のトーク例に全面差し替え
  * - 本文テンプレートに「ご担当者様」の宛名・結び・P.S.（診断リンク）まで含める形へ変更
  * - buildEmailBody は会社名を先頭に付け、末尾に署名（株式会社ラブキャラ / 奥田）を添える
+ * - 業界カテゴリがどのテンプレートにも一致しない（空欄含む）場合は
+ *   汎用テンプレート「その他の業界（汎用版）」にフォールバックして送る
  */
 
 const SCRIPT_VERSION = '2026-07-12';
@@ -62,6 +64,9 @@ const STATUS_ERROR = 'エラー';
 
 // アプローチ方法
 const APPROACH_EMAIL_CANDIDATE = 'メール候補';
+
+// 業界カテゴリがどのテンプレートにも一致しない場合に使う汎用テンプレートのターゲット名
+const DEFAULT_TEMPLATE_TARGET = 'その他の業界（汎用版）';
 
 // 添付内容ベースの埋め込みテンプレート
 // 本文には宛名（ご担当者様）・結び・P.S.（診断リンク）まで含める
@@ -604,6 +609,33 @@ ABEMA公式番組と共同開発をした診断では放送開始からわずか
 
 P.S. 実際の診断はこちらから1〜2分でご体験いただけます（恋愛診断ですが、"数問で自分ごと化しシェアしたくなる設計"をご覧ください）：
 https://lovecharacter64.jp/quiz`
+  },
+  {
+    // どの業界カテゴリにも一致しなかった場合に使用する汎用テンプレート
+    target: 'その他の業界（汎用版）',
+    subject: '広告費ゼロで累計8,000万回 — "診断"で御社の集客を変えるご提案',
+    body: `ご担当者様
+
+はじめてご連絡いたします。
+恋愛診断IP「ラブキャラ」を運営する株式会社ラブキャラの奥田です。
+
+私たちの診断は、広告費をかけずに累計8,000万回以上利用され、
+ABEMA公式番組と共同開発をした診断では放送開始からわずか13日で100万PVを突破しました。
+
+この"シェアされて自然に広がる診断"の仕組みを、
+さまざまな業界の集客・販促向けに「○○タイプ診断」として提供しています。
+広告費の高騰／若年層との接点不足／申込・購入の一歩手前での離脱
+こうした課題に、診断→結果別ページ→申込・予約・購入→LINEの導線を
+まるごと設計・制作でお応えします。
+
+御社の事業に合わせた診断のラフ案を1つお持ちし、
+15分でご説明させていただけないでしょうか。
+
+ぜひ、ご都合のよい候補日をいただけますと幸いです。
+よろしくお願いいたします。
+
+P.S. 拡散の元になっている診断そのものは、こちらから2分〜3分でご体験いただけます：
+https://lovecharacter64.jp/quiz`
   }
 ];
 
@@ -719,7 +751,7 @@ function createDraftsForOneSheet(sheet, templateMap, limit) {
       continue;
     }
 
-    const template = templateMap[normalizeKey(industry)];
+    const template = resolveTemplate(templateMap, industry);
     const subject = template.subject;
     const body = buildEmailBody(company, template.body);
 
@@ -809,12 +841,6 @@ function checkSentEmailsForOneSheet(sheet, templateMap) {
 
     checkedCount++;
 
-    if (!industry) {
-      markError(sheet, rowNumber, '送信済み確認エラー: 業界カテゴリが空欄です');
-      errorCount++;
-      continue;
-    }
-
     if (!email) {
       markError(sheet, rowNumber, '送信済み確認エラー: メールアドレスが空欄です');
       errorCount++;
@@ -834,14 +860,14 @@ function checkSentEmailsForOneSheet(sheet, templateMap) {
       continue;
     }
 
-    const templateKey = normalizeKey(industry);
-    if (!templateMap[templateKey]) {
-      markError(sheet, rowNumber, `送信済み確認エラー: 業界カテゴリに対応するメールテンプレートがありません: ${industry}`);
+    const template = resolveTemplate(templateMap, industry);
+    if (!template) {
+      markError(sheet, rowNumber, `送信済み確認エラー: メールテンプレートが見つかりません（汎用テンプレート「${DEFAULT_TEMPLATE_TARGET}」も未登録です）`);
       errorCount++;
       continue;
     }
 
-    const subject = templateMap[templateKey].subject;
+    const subject = template.subject;
 
     try {
       const sentDate = findSentEmailDate(email, subject, draftDate);
@@ -982,6 +1008,18 @@ function loadTemplateMap(templateSheet) {
 }
 
 /**
+ * 業界カテゴリに対応するテンプレートを返す。
+ * 完全一致するテンプレートが無い（未一致・空欄を含む）場合は汎用テンプレートを返す。
+ */
+function resolveTemplate(templateMap, industry) {
+  const key = normalizeKey(industry);
+  if (key && templateMap[key]) {
+    return templateMap[key];
+  }
+  return templateMap[normalizeKey(DEFAULT_TEMPLATE_TARGET)] || null;
+}
+
+/**
  * 会社名を先頭に付け、末尾に署名を添えて本文を組み立てる。
  * テンプレート本文には「ご担当者様」の宛名・結び・P.S.（診断リンク）まで含まれている前提。
  */
@@ -993,10 +1031,6 @@ ${EMAIL_SIGNATURE}`;
 }
 
 function validateRow(industry, company, email, templateMap) {
-  if (!industry) {
-    return '業界カテゴリが空欄です';
-  }
-
   if (!company) {
     return '会社名が空欄です';
   }
@@ -1009,8 +1043,10 @@ function validateRow(industry, company, email, templateMap) {
     return 'メールアドレス形式が不正です';
   }
 
-  if (!templateMap[normalizeKey(industry)]) {
-    return `業界カテゴリに対応するメールテンプレートがありません: ${industry}`;
+  // 業界カテゴリが一致しない場合は汎用テンプレートにフォールバックするため、
+  // 汎用テンプレートすら存在しないときだけエラーとする。
+  if (!resolveTemplate(templateMap, industry)) {
+    return `メールテンプレートが見つかりません（汎用テンプレート「${DEFAULT_TEMPLATE_TARGET}」も未登録です）`;
   }
 
   return '';
