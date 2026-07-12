@@ -11,7 +11,7 @@
  * 2026-07-12更新
  * - 業界カテゴリごとの件名・本文を最新のトーク例に全面差し替え
  * - 本文テンプレートに「ご担当者様」の宛名・結び・P.S.（診断リンク）まで含める形へ変更
- * - buildEmailBody は会社名を先頭に付け、本文テンプレートをそのまま利用する形に変更
+ * - buildEmailBody は会社名を先頭に付け、末尾に署名（株式会社ラブキャラ / 奥田）を添える
  */
 
 const SCRIPT_VERSION = '2026-07-12';
@@ -34,6 +34,10 @@ const TEMPLATE_SHEET_NAME = '診断サイト受託';
 
 // 1日あたりの下書き作成上限
 const DAILY_DRAFT_LIMIT = 15;
+
+// メール本文の最後に追加する署名
+const EMAIL_SIGNATURE = `株式会社ラブキャラ
+奥田`;
 
 // 営業リスト側の列番号
 const COL_INDUSTRY = 3;       // C列：業界カテゴリ
@@ -978,12 +982,14 @@ function loadTemplateMap(templateSheet) {
 }
 
 /**
- * 会社名を先頭に付けて本文を組み立てる。
+ * 会社名を先頭に付け、末尾に署名を添えて本文を組み立てる。
  * テンプレート本文には「ご担当者様」の宛名・結び・P.S.（診断リンク）まで含まれている前提。
  */
 function buildEmailBody(company, templateBody) {
   return `${company}
-${normalizeTemplateBody(templateBody)}`;
+${normalizeTemplateBody(templateBody)}
+
+${EMAIL_SIGNATURE}`;
 }
 
 function validateRow(industry, company, email, templateMap) {
