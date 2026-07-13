@@ -4,3 +4,6 @@ openpyxl>=3.1
 PyYAML>=6.0
 python-pptx>=0.6.23
 pytest>=7.0
+# 追加: 画像書き出し用（任意。無くてもLibreOfficeフォールバック）
+Pillow>=10.0
+PyMuPDF>=1.24  # LibreOffice経由のPDF→PNG化に使用（任意）

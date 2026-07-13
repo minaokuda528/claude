@@ -157,12 +157,79 @@ def calculate(current: pd.DataFrame, previous: pd.DataFrame | None,
     return pd.DataFrame(rows, columns=HEADER)
 
 
+GROUP_HEADER = ["区分", "対象", "表示数", "クリック数", "応募数", "面接数", "採用数", "広告費",
+                "クリック率", "応募率", "面接設定率", "採用率",
+                "クリック単価", "応募単価", "採用単価",
+                "応募数前月比", "応募単価前月比", "応募数目標比", "応募単価目標比"]
+
+DIMENSIONS = [("media", "媒体"), ("job_category", "職種"), ("location", "拠点")]
+
+
+def _col_sum(df_rows, col):
+    if col not in df_rows.columns:
+        return None
+    vals = [_num(x) for x in df_rows[col]]
+    vals = [x for x in vals if x is not None]
+    return sum(vals) if vals else None
+
+
+def build_groups(current: pd.DataFrame, previous: pd.DataFrame | None,
+                 targets: pd.DataFrame | None, logger) -> pd.DataFrame:
+    """媒体別・職種別・拠点別の集計行を作成する（率・単価は合計値から再計算）。
+
+    集計単位の目標比: 応募数目標は加算可能なため、対象グループの全明細に目標が
+    そろっている場合のみ算出する（1つでも欠ければ NOT_SET）。応募単価目標は
+    グループ合算の定義が曖昧なため、集計行では常に NOT_SET とする。
+    """
+    cur = current[current["row_type"] == "detail"].copy()
+    prev = previous[previous["row_type"] == "detail"].copy() if previous is not None else None
+    tgt_map = {}
+    if targets is not None:
+        for _, r in targets.iterrows():
+            tgt_map[_key(r)] = _num(r.get("target_applications"))
+
+    out_rows = []
+    for col, dim_name in DIMENSIONS:
+        for value, g in cur.groupby(cur[col].fillna("（未設定）"), sort=False):
+            counts = {c: _col_sum(g, c) for c in COUNT_COLS}
+            cpa = unit_cost(counts["cost"], counts["applications"])
+            # 前月比
+            if prev is not None:
+                pg = prev[prev[col].fillna("（未設定）") == value]
+                if pg.empty:
+                    app_mom = cpa_mom = NEW
+                else:
+                    p_app, p_cost = _col_sum(pg, "applications"), _col_sum(pg, "cost")
+                    app_mom = mom(counts["applications"], p_app)
+                    cpa_mom = mom(cpa, unit_cost(p_cost, p_app))
+            else:
+                app_mom = cpa_mom = NEW
+            # 応募数目標比（全明細に目標があるときのみ）
+            g_targets = [tgt_map.get(_key(r)) for _, r in g.iterrows()]
+            if targets is None or any(x is None for x in g_targets):
+                app_tgt = NOT_SET
+            else:
+                app_tgt = vs_target(counts["applications"], sum(g_targets))
+            out_rows.append([dim_name, value,
+                             *(_fmt_int(counts[c]) for c in COUNT_COLS[:5]), _fmt_int(counts["cost"]),
+                             rate(counts["clicks"], counts["impressions"]),
+                             rate(counts["applications"], counts["clicks"]),
+                             rate(counts["interviews"], counts["applications"]),
+                             rate(counts["hires"], counts["applications"]),
+                             unit_cost(counts["cost"], counts["clicks"]), cpa,
+                             unit_cost(counts["cost"], counts["hires"]),
+                             app_mom, cpa_mom, app_tgt, NOT_SET])
+    logger.info("集計完了: 媒体・職種・拠点別 計%d行", len(out_rows))
+    return pd.DataFrame(out_rows, columns=GROUP_HEADER)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="KPI・前月比・目標比の計算")
     ap.add_argument("--current", required=True, help="標準化済みの当月データCSV")
     ap.add_argument("--previous", help="標準化済みの前月データCSV（任意）")
     ap.add_argument("--targets", help="標準化済みの目標値CSV（任意）")
     ap.add_argument("--output", required=True, help="KPI結果の出力先CSV")
+    ap.add_argument("--group-output", help="媒体別・職種別・拠点別の集計CSV出力先（任意）")
     ap.add_argument("--log", help="ログファイルパス")
     args = ap.parse_args()
 
@@ -175,6 +242,11 @@ def main() -> int:
         Path(args.output).parent.mkdir(parents=True, exist_ok=True)
         result.to_csv(args.output, index=False, encoding="utf-8")
         logger.info("KPI結果を出力しました: %s", args.output)
+        if args.group_output:
+            groups = build_groups(current, previous, targets, logger)
+            Path(args.group_output).parent.mkdir(parents=True, exist_ok=True)
+            groups.to_csv(args.group_output, index=False, encoding="utf-8")
+            logger.info("集計結果を出力しました: %s", args.group_output)
         return 0
     except Exception as e:
         logger.error("KPI計算に失敗しました: %s", e)
