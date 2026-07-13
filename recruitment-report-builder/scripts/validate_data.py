@@ -84,6 +84,17 @@ def validate(current: pd.DataFrame, previous: pd.DataFrame | None,
         return  # 以降の行検証は不可能
 
     detail = current[current["row_type"] == "detail"]
+
+    # 必須の数値列が丸ごと空（=実質的に列が無い）場合は E-001 として扱う
+    empty_required = set()
+    for col in ("applications", "cost"):
+        if col not in current.columns or \
+                pd.to_numeric(detail[col], errors="coerce").notna().sum() == 0:
+            empty_required.add(col)
+            findings.error("E-001", "", col,
+                           f"必須項目「{col}」の値が1件もありません（列が無いか全て空欄です）",
+                           "入力ファイルに該当列があり、値が入っているか確認してください")
+
     seen_keys: dict[tuple, int] = {}
     for i, row in detail.iterrows():
         rowno, label = i + 2, _label(row)
@@ -98,7 +109,7 @@ def validate(current: pd.DataFrame, previous: pd.DataFrame | None,
                 findings.error("E-003", rowno, f"{label}: {col}",
                                f"「{col}」がマイナス値です: {v}",
                                "元データの該当セルを確認してください")
-            elif v is None and col in ("applications", "cost"):
+            elif v is None and col in ("applications", "cost") and col not in empty_required:
                 findings.error("E-002", rowno, f"{label}: {col}",
                                f"必須項目「{col}」が空欄です",
                                "応募数・広告費は必須です。値を入力してください")

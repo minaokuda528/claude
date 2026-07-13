@@ -1,0 +1,57 @@
+# 別企業（架空）設定。デモ企業と媒体・列名・色・閾値が異なる。
+company:
+  name: 架空ロジ株式会社
+  department: 人事課
+  report_title: 採用媒体レポート
+  report_to: 人事部長
+  frequency: monthly
+  current_period: "2026-06"
+  previous_period: "2026-05"
+
+media:
+  registered:
+    - マイナビバイト
+    - タウンワーク
+  aliases:
+    マイナビ: マイナビバイト
+    townwork: タウンワーク
+
+# この企業のCSVは独自の列名を使う
+column_aliases:
+  ばいたい: media
+  しょくしゅ: job_category
+  勤務地: location
+  応募件数: applications
+  掲載料金: cost
+  面接: interviews
+  採用: hires
+
+kpi:
+  required:
+    - applications
+    - cost
+    - cpa
+  optional:
+    - interviews
+    - hires
+    - hire_rate
+    - cph
+
+thresholds:
+  cpa_warning_yen: 30000
+  mom_change_warning_pct: 40
+  good_target_ratio_pct: 100
+  good_mom_increase_pct: 15
+  caution_cpa_target_ratio_pct: 110
+  caution_mom_decrease_pct: -15
+
+report:
+  slides: [cover, executive_summary, main_kpi, by_media, by_job, best_worst, issues, open_items]
+  tone: です・ます調
+  summary_length: short
+  brand_color: "#C8102E"
+  logo: none
+
+analysis:
+  primary_kpi: cph
+  avoid_expressions: [絶対]
