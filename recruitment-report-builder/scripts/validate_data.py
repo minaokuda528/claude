@@ -69,7 +69,8 @@ class Findings:
 
 def validate(current: pd.DataFrame, previous: pd.DataFrame | None,
              targets: pd.DataFrame | None, settings: dict | None,
-             kpi: pd.DataFrame | None, findings: Findings) -> None:
+             kpi: pd.DataFrame | None, findings: Findings,
+             allow_total_mismatch: bool = False) -> None:
     th = (settings or {}).get("thresholds", {}) or {}
     cpa_warn = th.get("cpa_warning_yen", 50000)
     mom_warn = th.get("mom_change_warning_pct", 50)
@@ -169,9 +170,15 @@ def validate(current: pd.DataFrame, previous: pd.DataFrame | None,
                 continue
             dv = pd.to_numeric(detail[col], errors="coerce").dropna().sum()
             if abs(tv - dv) > 0.5:
-                findings.error("E-020", "", col,
-                               f"合計行の「{col}」({tv:.0f})が明細の合計({dv:.0f})と一致しません（差{tv - dv:+.0f}）",
-                               "媒体管理画面の値と明細を照合してください。合計行を除外して続行する場合は承認が必要です")
+                if allow_total_mismatch:
+                    findings.warning("W-020C", "", col,
+                                     f"合計行の「{col}」({tv:.0f})が明細の合計({dv:.0f})と一致しません"
+                                     f"（差{tv - dv:+.0f}）。承認により合計行を除外して明細で続行します",
+                                     "明細合計を正としてレポートを作成しました。管理画面の値もご確認ください")
+                else:
+                    findings.error("E-020", "", col,
+                                   f"合計行の「{col}」({tv:.0f})が明細の合計({dv:.0f})と一致しません（差{tv - dv:+.0f}）",
+                                   "媒体管理画面の値と明細を照合してください。合計行を除外して続行する場合は承認が必要です")
 
     # W-010 / W-011（KPI結果がある場合）
     if kpi is not None:
@@ -201,6 +208,8 @@ def main() -> int:
     ap.add_argument("--kpi", help="KPI結果CSV（異常値検証に使用・任意）")
     ap.add_argument("--normalize-report", help="normalize_data.pyの正規化レポート（統合する・任意）")
     ap.add_argument("--output", required=True, help="検証レポートの出力先CSV")
+    ap.add_argument("--allow-total-mismatch", action="store_true",
+                    help="合計不一致(E-020)を承認済みとして警告に降格し、明細合計で続行する")
     ap.add_argument("--log", help="ログファイルパス")
     args = ap.parse_args()
 
@@ -217,7 +226,8 @@ def main() -> int:
             for _, r in pd.read_csv(args.normalize_report).iterrows():
                 findings.warning(str(r["code"]), r.get("row", ""), str(r.get("target", "")),
                                  str(r["message"]), "内容を確認してください（自動正規化済み）")
-        validate(current, previous, targets, settings, kpi, findings)
+        validate(current, previous, targets, settings, kpi, findings,
+                 allow_total_mismatch=args.allow_total_mismatch)
 
         report = pd.DataFrame(findings.items,
                               columns=["level", "code", "row", "target", "message", "action"])

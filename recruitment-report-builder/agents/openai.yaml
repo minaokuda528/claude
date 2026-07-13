@@ -1,0 +1,72 @@
+# ============================================================
+# エージェント定義（recruitment-report-builder）
+# Skillを外部エージェント基盤（OpenAI Assistants / 互換ランタイム等）で
+# 動かす場合の設定例。Claude Code / Claude 上で使う場合は SKILL.md が本体で、
+# このファイルは移植時の参考。数値計算は必ず同梱スクリプトで行う方針は共通。
+# ============================================================
+name: recruitment-report-builder
+version: 1.0.0
+description: >-
+  求人媒体の結果データからKPI集計・前月/目標比較・分析サマリー・PowerPoint報告資料を
+  作成する汎用・セルフ実装型エージェント。数値はスクリプトで計算し、最終判断は人が行う。
+
+language: ja
+model:
+  # ランタイム側で最新の対応モデルに置き換える
+  recommended: gpt-4o
+  temperature: 0.2   # 数値・事実重視のため低めに
+
+instructions_file: ../SKILL.md   # 動作指示は SKILL.md を参照
+
+modes:
+  - id: setup
+    label: 初期設定モード
+    guide: ../references/setup-guide.md
+  - id: report
+    label: レポート作成モード
+    guide: ../references/error-handling.md
+  - id: customize
+    label: 設定変更モード
+    guide: ../references/customization-guide.md
+  - id: validate
+    label: 検証モード
+    guide: ../references/validation-rules.md
+
+tools:
+  - name: run_report
+    type: shell
+    command: "python3 scripts/run_report.py"
+    description: 標準化→KPI計算→検証→サマリー入力（--make-pptxでPowerPointも）
+  - name: validate_settings
+    type: shell
+    command: "python3 scripts/validate_settings.py"
+    description: 会社設定YAMLの形式・矛盾を検証
+  - name: normalize_data
+    type: shell
+    command: "python3 scripts/normalize_data.py"
+    description: データ標準化（列名・媒体名・数値形式の統一）
+  - name: calculate_kpi
+    type: shell
+    command: "python3 scripts/calculate_kpi.py"
+    description: KPI・前月比・目標比の計算（明細+媒体/職種/拠点別集計）
+  - name: validate_data
+    type: shell
+    command: "python3 scripts/validate_data.py"
+    description: データ検証（エラー/警告の区分）
+  - name: generate_summary_input
+    type: shell
+    command: "python3 scripts/generate_summary_input.py"
+    description: サマリー用の構造化JSON生成（判定込み）
+  - name: generate_pptx
+    type: shell
+    command: "python3 scripts/generate_pptx.py"
+    description: PowerPoint生成と検証
+
+guardrails:
+  - データエラーがある状態で確定資料を作らない
+  - 数値を文章推論で計算・補完しない（スクリプトの出力のみ使用）
+  - PowerPoint作成前に分析内容を人が確認する
+  - 個人情報・実在企業情報・認証情報を保存・出力しない
+  - 空欄と0を区別し、0除算は「算出不可」と表示する
+
+dependencies_file: ../requirements.txt
