@@ -37,7 +37,7 @@ Google Docs へ貼り付けられる業務日報を作成する Claude スキル
 | 0 | プロジェクト初期化 | 完了 |
 | 1 | 要件定義(references/ 各ファイル作成) | 完了 |
 | 2 | デモデータ作成(assets/) | 完了 |
-| 3 | SKILL.md 作成 | 未着手 |
+| 3 | SKILL.md 作成 | 完了 |
 | 4 | 動作テストと修正(test-results/) | 未着手 |
 | 5 | 利用者向けマニュアル(README.md 完成) | 未着手 |
 | 6 | Google Docs 連携サンプル(optional-integration/) | 未着手 |
