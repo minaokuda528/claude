@@ -1,0 +1,629 @@
+{
+  "meta": {
+    "description": "求人媒体月次サマリー作成用の構造化データ。数値の単位はキー名に明示。特殊値: N/A=算出不可, NEW=前月データなし, NOT_SET=目標未設定。",
+    "company": "株式会社サンプル採用企画",
+    "period": "2026-06",
+    "previous_period": "2026-05",
+    "source": "calculate_kpi.py の出力CSV（数値の再計算をしないこと）"
+  },
+  "thresholds": {
+    "good_target_ratio_pct": 100,
+    "good_mom_increase_pct": 20,
+    "caution_cpa_target_ratio_pct": 120,
+    "caution_mom_decrease_pct": -20,
+    "cpa_warning_yen": 50000
+  },
+  "overall": {
+    "media": "全体",
+    "job": "合計",
+    "location": "-",
+    "label": "全体 合計",
+    "metrics": {
+      "impressions": 114000,
+      "clicks": 5170,
+      "applications": 98,
+      "interviews": 33,
+      "hires": 9,
+      "cost_yen": 635000,
+      "ctr_pct": 4.5,
+      "application_rate_pct": 1.9,
+      "interview_rate_pct": 33.7,
+      "hire_rate_pct": 9.2,
+      "cpc_yen": 123,
+      "cpa_yen": 6480,
+      "cph_yen": 70556
+    },
+    "comparison": {
+      "applications_mom_pct": 24.1,
+      "cpa_mom_pct": 11.3,
+      "applications_vs_target_pct": 105.4,
+      "cpa_vs_target_pct": "NOT_SET"
+    },
+    "flags": []
+  },
+  "rows": [
+    {
+      "media": "Indeed",
+      "job": "法人営業",
+      "location": "東京",
+      "label": "Indeed 法人営業 東京",
+      "metrics": {
+        "impressions": 22000,
+        "clicks": 900,
+        "applications": 30,
+        "interviews": 12,
+        "hires": 3,
+        "cost_yen": 120000,
+        "ctr_pct": 4.1,
+        "application_rate_pct": 3.3,
+        "interview_rate_pct": 40,
+        "hire_rate_pct": 10,
+        "cpc_yen": 133,
+        "cpa_yen": 4000,
+        "cph_yen": 40000
+      },
+      "comparison": {
+        "applications_mom_pct": 50,
+        "cpa_mom_pct": -20,
+        "applications_vs_target_pct": 100,
+        "cpa_vs_target_pct": 88.9
+      },
+      "flags": [
+        "good"
+      ]
+    },
+    {
+      "media": "Indeed",
+      "job": "一般事務",
+      "location": "東京",
+      "label": "Indeed 一般事務 東京",
+      "metrics": {
+        "impressions": 18000,
+        "clicks": 900,
+        "applications": 30,
+        "interviews": 10,
+        "hires": 1,
+        "cost_yen": 150000,
+        "ctr_pct": 5,
+        "application_rate_pct": 3.3,
+        "interview_rate_pct": 33.3,
+        "hire_rate_pct": 3.3,
+        "cpc_yen": 167,
+        "cpa_yen": 5000,
+        "cph_yen": 150000
+      },
+      "comparison": {
+        "applications_mom_pct": 20,
+        "cpa_mom_pct": 66.7,
+        "applications_vs_target_pct": 107.1,
+        "cpa_vs_target_pct": 125
+      },
+      "flags": [
+        "good",
+        "caution"
+      ]
+    },
+    {
+      "media": "求人ボックス",
+      "job": "法人営業",
+      "location": "大阪",
+      "label": "求人ボックス 法人営業 大阪",
+      "metrics": {
+        "impressions": 30000,
+        "clicks": 1500,
+        "applications": 5,
+        "interviews": 2,
+        "hires": 0,
+        "cost_yen": 90000,
+        "ctr_pct": 5,
+        "application_rate_pct": 0.3,
+        "interview_rate_pct": 40,
+        "hire_rate_pct": 0,
+        "cpc_yen": 60,
+        "cpa_yen": 18000,
+        "cph_yen": "N/A"
+      },
+      "comparison": {
+        "applications_mom_pct": -37.5,
+        "cpa_mom_pct": 69.4,
+        "applications_vs_target_pct": 50,
+        "cpa_vs_target_pct": 225
+      },
+      "flags": [
+        "caution"
+      ]
+    },
+    {
+      "media": "エンゲージ",
+      "job": "一般事務",
+      "location": "大阪",
+      "label": "エンゲージ 一般事務 大阪",
+      "metrics": {
+        "impressions": 5000,
+        "clicks": 200,
+        "applications": 4,
+        "interviews": 3,
+        "hires": 2,
+        "cost_yen": 40000,
+        "ctr_pct": 4,
+        "application_rate_pct": 2,
+        "interview_rate_pct": 75,
+        "hire_rate_pct": 50,
+        "cpc_yen": 200,
+        "cpa_yen": 10000,
+        "cph_yen": 20000
+      },
+      "comparison": {
+        "applications_mom_pct": -20,
+        "cpa_mom_pct": 25,
+        "applications_vs_target_pct": 80,
+        "cpa_vs_target_pct": 125
+      },
+      "flags": [
+        "small_sample",
+        "caution"
+      ]
+    },
+    {
+      "media": "エンゲージ",
+      "job": "コールセンタースタッフ",
+      "location": "東京",
+      "label": "エンゲージ コールセンタースタッフ 東京",
+      "metrics": {
+        "impressions": 8000,
+        "clicks": 320,
+        "applications": 12,
+        "interviews": 4,
+        "hires": 1,
+        "cost_yen": 60000,
+        "ctr_pct": 4,
+        "application_rate_pct": 3.8,
+        "interview_rate_pct": 33.3,
+        "hire_rate_pct": 8.3,
+        "cpc_yen": 188,
+        "cpa_yen": 5000,
+        "cph_yen": 60000
+      },
+      "comparison": {
+        "applications_mom_pct": "NEW",
+        "cpa_mom_pct": "NEW",
+        "applications_vs_target_pct": "NOT_SET",
+        "cpa_vs_target_pct": "NOT_SET"
+      },
+      "flags": [
+        "new_listing",
+        "target_not_set"
+      ]
+    },
+    {
+      "media": "求人ボックス",
+      "job": "一般事務",
+      "location": "東京",
+      "label": "求人ボックス 一般事務 東京",
+      "metrics": {
+        "impressions": 12000,
+        "clicks": 300,
+        "applications": 0,
+        "interviews": 0,
+        "hires": 0,
+        "cost_yen": 45000,
+        "ctr_pct": 2.5,
+        "application_rate_pct": 0,
+        "interview_rate_pct": "N/A",
+        "hire_rate_pct": "N/A",
+        "cpc_yen": 150,
+        "cpa_yen": "N/A",
+        "cph_yen": "N/A"
+      },
+      "comparison": {
+        "applications_mom_pct": -100,
+        "cpa_mom_pct": "N/A",
+        "applications_vs_target_pct": 0,
+        "cpa_vs_target_pct": "N/A"
+      },
+      "flags": [
+        "zero_applications_with_cost",
+        "caution"
+      ]
+    },
+    {
+      "media": "Indeed",
+      "job": "コールセンタースタッフ",
+      "location": "大阪",
+      "label": "Indeed コールセンタースタッフ 大阪",
+      "metrics": {
+        "impressions": null,
+        "clicks": 400,
+        "applications": 10,
+        "interviews": null,
+        "hires": 1,
+        "cost_yen": 50000,
+        "ctr_pct": "N/A",
+        "application_rate_pct": 2.5,
+        "interview_rate_pct": "N/A",
+        "hire_rate_pct": 10,
+        "cpc_yen": 125,
+        "cpa_yen": 5000,
+        "cph_yen": 50000
+      },
+      "comparison": {
+        "applications_mom_pct": 11.1,
+        "cpa_mom_pct": -6.2,
+        "applications_vs_target_pct": 100,
+        "cpa_vs_target_pct": 100
+      },
+      "flags": [
+        "good"
+      ]
+    },
+    {
+      "media": "求人ボックス",
+      "job": "コールセンタースタッフ",
+      "location": "大阪",
+      "label": "求人ボックス コールセンタースタッフ 大阪",
+      "metrics": {
+        "impressions": 15000,
+        "clicks": 500,
+        "applications": 1,
+        "interviews": 0,
+        "hires": 0,
+        "cost_yen": 80000,
+        "ctr_pct": 3.3,
+        "application_rate_pct": 0.2,
+        "interview_rate_pct": 0,
+        "hire_rate_pct": 0,
+        "cpc_yen": 160,
+        "cpa_yen": 80000,
+        "cph_yen": "N/A"
+      },
+      "comparison": {
+        "applications_mom_pct": -75,
+        "cpa_mom_pct": 357.1,
+        "applications_vs_target_pct": "NOT_SET",
+        "cpa_vs_target_pct": "NOT_SET"
+      },
+      "flags": [
+        "target_not_set",
+        "small_sample",
+        "cpa_over_warning_threshold",
+        "caution"
+      ]
+    },
+    {
+      "media": "エンゲージ",
+      "job": "法人営業",
+      "location": "東京",
+      "label": "エンゲージ 法人営業 東京",
+      "metrics": {
+        "impressions": 4000,
+        "clicks": 150,
+        "applications": 6,
+        "interviews": 2,
+        "hires": 1,
+        "cost_yen": 0,
+        "ctr_pct": 3.8,
+        "application_rate_pct": 4,
+        "interview_rate_pct": 33.3,
+        "hire_rate_pct": 16.7,
+        "cpc_yen": 0,
+        "cpa_yen": 0,
+        "cph_yen": 0
+      },
+      "comparison": {
+        "applications_mom_pct": 20,
+        "cpa_mom_pct": 0,
+        "applications_vs_target_pct": 120,
+        "cpa_vs_target_pct": "NOT_SET"
+      },
+      "flags": [
+        "target_not_set",
+        "cost_zero_with_applications",
+        "good"
+      ]
+    }
+  ],
+  "judgements": {
+    "good": [
+      {
+        "label": "Indeed 法人営業 東京",
+        "reasons": [
+          "応募数目標比100%",
+          "応募数前月比+50%"
+        ]
+      },
+      {
+        "label": "Indeed 一般事務 東京",
+        "reasons": [
+          "応募数目標比107.1%",
+          "応募数前月比+20%"
+        ]
+      },
+      {
+        "label": "Indeed コールセンタースタッフ 大阪",
+        "reasons": [
+          "応募数目標比100%"
+        ]
+      },
+      {
+        "label": "エンゲージ 法人営業 東京",
+        "reasons": [
+          "応募数目標比120%",
+          "応募数前月比+20%"
+        ]
+      }
+    ],
+    "caution": [
+      {
+        "label": "Indeed 一般事務 東京",
+        "reasons": [
+          "応募単価目標比125%（目標超過）"
+        ]
+      },
+      {
+        "label": "求人ボックス 法人営業 大阪",
+        "reasons": [
+          "応募単価目標比225%（目標超過）",
+          "応募数前月比-37.5%"
+        ]
+      },
+      {
+        "label": "エンゲージ 一般事務 大阪",
+        "reasons": [
+          "応募単価目標比125%（目標超過）",
+          "応募数前月比-20%"
+        ]
+      },
+      {
+        "label": "求人ボックス 一般事務 東京",
+        "reasons": [
+          "応募数前月比-100%"
+        ]
+      },
+      {
+        "label": "求人ボックス コールセンタースタッフ 大阪",
+        "reasons": [
+          "応募数前月比-75%"
+        ]
+      }
+    ],
+    "priority": [
+      {
+        "rank": 1,
+        "level": "高",
+        "label": "求人ボックス 一般事務 東京",
+        "reason": "応募0件で広告費45,000円が発生"
+      },
+      {
+        "rank": 2,
+        "level": "高",
+        "label": "求人ボックス コールセンタースタッフ 大阪",
+        "reason": "応募単価80,000円が警告閾値50,000円を超過"
+      },
+      {
+        "rank": 3,
+        "level": "中",
+        "label": "Indeed 一般事務 東京",
+        "reason": "応募単価目標比125%（目標超過）"
+      },
+      {
+        "rank": 4,
+        "level": "中",
+        "label": "求人ボックス 法人営業 大阪",
+        "reason": "応募単価目標比225%（目標超過） / 応募数前月比-37.5%"
+      },
+      {
+        "rank": 5,
+        "level": "中",
+        "label": "エンゲージ 一般事務 大阪",
+        "reason": "応募単価目標比125%（目標超過） / 応募数前月比-20%"
+      }
+    ]
+  },
+  "data_issues": [
+    {
+      "level": "warning",
+      "code": "W-020",
+      "target": "媒体名",
+      "message": "列名「媒体名」を内部項目「media」へ統一しました"
+    },
+    {
+      "level": "warning",
+      "code": "W-020",
+      "target": "職種",
+      "message": "列名「職種」を内部項目「job_category」へ統一しました"
+    },
+    {
+      "level": "warning",
+      "code": "W-020",
+      "target": "勤務地",
+      "message": "列名「勤務地」を内部項目「location」へ統一しました"
+    },
+    {
+      "level": "warning",
+      "code": "W-020",
+      "target": "表示回数",
+      "message": "列名「表示回数」を内部項目「impressions」へ統一しました"
+    },
+    {
+      "level": "warning",
+      "code": "W-020",
+      "target": "クリック数",
+      "message": "列名「クリック数」を内部項目「clicks」へ統一しました"
+    },
+    {
+      "level": "warning",
+      "code": "W-020",
+      "target": "応募数",
+      "message": "列名「応募数」を内部項目「applications」へ統一しました"
+    },
+    {
+      "level": "warning",
+      "code": "W-020",
+      "target": "面接数",
+      "message": "列名「面接数」を内部項目「interviews」へ統一しました"
+    },
+    {
+      "level": "warning",
+      "code": "W-020",
+      "target": "採用数",
+      "message": "列名「採用数」を内部項目「hires」へ統一しました"
+    },
+    {
+      "level": "warning",
+      "code": "W-020",
+      "target": "広告費用",
+      "message": "列名「広告費用」を内部項目「cost」へ統一しました"
+    },
+    {
+      "level": "warning",
+      "code": "W-020",
+      "target": "備考",
+      "message": "列名「備考」を内部項目「note」へ統一しました"
+    },
+    {
+      "level": "warning",
+      "code": "W-005",
+      "target": "22,000",
+      "message": "数値表記「22,000」を 22000 へ統一しました"
+    },
+    {
+      "level": "warning",
+      "code": "W-005",
+      "target": "120,000円",
+      "message": "数値表記「120,000円」を 120000 へ統一しました"
+    },
+    {
+      "level": "warning",
+      "code": "W-004",
+      "target": "indeed",
+      "message": "媒体名「indeed」を「Indeed」へ統一しました"
+    },
+    {
+      "level": "warning",
+      "code": "W-005",
+      "target": "150000円",
+      "message": "数値表記「150000円」を 150000 へ統一しました"
+    },
+    {
+      "level": "warning",
+      "code": "W-004",
+      "target": "求人BOX",
+      "message": "媒体名「求人BOX」を「求人ボックス」へ統一しました"
+    },
+    {
+      "level": "warning",
+      "code": "W-005",
+      "target": "30,000",
+      "message": "数値表記「30,000」を 30000 へ統一しました"
+    },
+    {
+      "level": "warning",
+      "code": "W-005",
+      "target": "1,500",
+      "message": "数値表記「1,500」を 1500 へ統一しました"
+    },
+    {
+      "level": "warning",
+      "code": "W-014",
+      "target": " コールセンタースタッフ",
+      "message": "「 コールセンタースタッフ」の前後空白を除去しました"
+    },
+    {
+      "level": "warning",
+      "code": "W-005",
+      "target": "60,000",
+      "message": "数値表記「60,000」を 60000 へ統一しました"
+    },
+    {
+      "level": "warning",
+      "code": "W-005",
+      "target": "80,000円",
+      "message": "数値表記「80,000円」を 80000 へ統一しました"
+    },
+    {
+      "level": "warning",
+      "code": "W-001",
+      "target": "エンゲージ / コールセンタースタッフ / 東京",
+      "message": "前月データがありません（新規掲載）。前月比は「新規」と表示します"
+    },
+    {
+      "level": "warning",
+      "code": "W-002",
+      "target": "エンゲージ / コールセンタースタッフ / 東京",
+      "message": "目標値が設定されていません。目標比は「未設定」と表示します"
+    },
+    {
+      "level": "warning",
+      "code": "W-012",
+      "target": "求人ボックス / 一般事務 / 東京",
+      "message": "応募が0件です。応募単価などは算出不可となります"
+    },
+    {
+      "level": "warning",
+      "code": "W-003",
+      "target": "Indeed / コールセンタースタッフ / 大阪: impressions",
+      "message": "「impressions」が空欄です（0ではなく欠損として扱います）"
+    },
+    {
+      "level": "warning",
+      "code": "W-003",
+      "target": "Indeed / コールセンタースタッフ / 大阪: interviews",
+      "message": "「interviews」が空欄です（0ではなく欠損として扱います）"
+    },
+    {
+      "level": "warning",
+      "code": "W-002",
+      "target": "求人ボックス / コールセンタースタッフ / 大阪",
+      "message": "目標値が設定されていません。目標比は「未設定」と表示します"
+    },
+    {
+      "level": "warning",
+      "code": "W-013",
+      "target": "エンゲージ / 法人営業 / 東京",
+      "message": "広告費0円で応募6件があります（費用0円・要確認）"
+    },
+    {
+      "level": "error",
+      "code": "E-020",
+      "target": "applications",
+      "message": "合計行の「applications」(103)が明細の合計(98)と一致しません（差+5）"
+    },
+    {
+      "level": "warning",
+      "code": "W-011",
+      "target": "Indeed / 一般事務 / 東京",
+      "message": "応募単価の前月比が+66.7%と大きく変動しています（閾値±50%）"
+    },
+    {
+      "level": "warning",
+      "code": "W-011",
+      "target": "求人ボックス / 法人営業 / 大阪",
+      "message": "応募単価の前月比が+69.4%と大きく変動しています（閾値±50%）"
+    },
+    {
+      "level": "warning",
+      "code": "W-011",
+      "target": "求人ボックス / 一般事務 / 東京",
+      "message": "応募数の前月比が-100.0%と大きく変動しています（閾値±50%）"
+    },
+    {
+      "level": "warning",
+      "code": "W-010",
+      "target": "求人ボックス / コールセンタースタッフ / 大阪",
+      "message": "応募単価80000円が警告閾値（50,000円）を超えています"
+    },
+    {
+      "level": "warning",
+      "code": "W-011",
+      "target": "求人ボックス / コールセンタースタッフ / 大阪",
+      "message": "応募数の前月比が-75.0%と大きく変動しています（閾値±50%）"
+    },
+    {
+      "level": "warning",
+      "code": "W-011",
+      "target": "求人ボックス / コールセンタースタッフ / 大阪",
+      "message": "応募単価の前月比が+357.1%と大きく変動しています（閾値±50%）"
+    }
+  ],
+  "user_comments": "6月はIndeed一般事務でクリック強化キャンペーンを実施（当月データ備考欄より）"
+}
