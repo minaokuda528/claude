@@ -1,0 +1,34 @@
+# ============================================================
+# 資料設定テンプレート（report-settings.yaml）
+# 会社設定の report: セクションだけを切り出して個別管理したい場合に使います。
+# company-settings.yaml の report: と同じ内容です。どちらか一方で構いません。
+# ============================================================
+
+report:
+  slides:
+    - cover
+    - executive_summary
+    - main_kpi
+    - by_media
+    - by_job
+    - by_location
+    - best_worst
+    - issues
+    - actions
+    - open_items
+  tone: です・ます調
+  summary_length: standard      # short / standard / long
+  brand_color: "#2E5E8C"
+  logo: none
+
+# スライドの説明（編集の参考。この節は読み飛ばして構いません）
+# cover             : 表紙
+# executive_summary : エグゼクティブサマリー（全体の要点）
+# main_kpi          : 主要KPI（全体数値）
+# by_media          : 媒体別比較
+# by_job            : 職種別比較
+# by_location       : 拠点別比較
+# best_worst        : 好調・要改善の求人
+# issues            : 課題分析
+# actions           : 次月の改善案
+# open_items        : 要確認事項

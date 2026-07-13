@@ -1,0 +1,70 @@
+# ============================================================
+# 会社設定テンプレート（company-settings.yaml）
+# 初回設定でClaudeが質問しながら、この形に沿って会社別ファイルを作成します。
+# 「不明」「未設定」の項目は空欄または該当キーを省略しても構いません（後から変更できます）。
+# 実在企業名・認証情報（媒体のID/パスワード）は書かないでください。
+# ============================================================
+
+company:
+  name: ""                     # 会社名（例: 株式会社〇〇）
+  department: ""               # 部署名（例: 採用部）
+  report_title: "求人媒体 月次結果報告書"   # 資料名
+  report_to: ""                # 報告先（例: 採用責任者）
+  frequency: monthly           # 作成頻度（初期版は monthly のみ）
+  current_period: ""           # 当月（YYYY-MM。例: 2026-06）
+  previous_period: ""          # 前月（YYYY-MM。無ければ空欄）
+
+media:
+  registered: []               # 使用している求人媒体の正式名称（例: [Indeed, 求人ボックス, エンゲージ]）
+  aliases: {}                  # 表記揺れ → 正式名称（例: {indeed: Indeed, 求人BOX: 求人ボックス}）
+
+# 入力CSV/Excelの列名が下表と異なる場合の対応表（列名 → 内部項目）。
+# 既定の一般的な列名（媒体/職種/応募数/広告費 など）は自動認識するため、
+# 特殊な列名のときだけ追記してください。
+column_aliases: {}             # 例: {"応募件数(合計)": applications, "掲載料金": cost}
+
+kpi:
+  required:                    # 必須KPI（不足するとレポート作成を止める）
+    - applications             # 応募数
+    - cost                     # 広告費
+    - cpa                      # 応募単価
+  optional:                    # 任意KPI（データがあれば表示）
+    - impressions
+    - clicks
+    - ctr
+    - application_rate
+    - interviews
+    - interview_rate
+    - hires
+    - hire_rate
+    - cpc
+    - cph
+
+thresholds:                    # 判定・警告の基準値（未入力なら既定値を使用）
+  cpa_warning_yen: 50000            # 応募単価がこの額を超えたら警告
+  mom_change_warning_pct: 50        # 前月比が±この%を超えたら警告
+  good_target_ratio_pct: 100        # 好調: 応募数目標比がこの%以上
+  good_mom_increase_pct: 20         # 好調: 応募数前月比が+この%以上
+  caution_cpa_target_ratio_pct: 120 # 注意: 応募単価目標比がこの%以上
+  caution_mom_decrease_pct: -20     # 注意: 応募数前月比がこの%以下
+
+report:
+  slides:                      # 出力するスライド（不要なものは削除）
+    - cover                    # 表紙
+    - executive_summary        # エグゼクティブサマリー
+    - main_kpi                 # 主要KPI
+    - by_media                 # 媒体別比較
+    - by_job                   # 職種別比較
+    - by_location              # 拠点別比較
+    - best_worst               # 好調・要改善求人
+    - issues                   # 課題分析
+    - actions                  # 次月の改善案
+    - open_items               # 要確認事項
+  tone: です・ます調            # 文体
+  summary_length: standard     # サマリーの長さ（short / standard / long）
+  brand_color: "#2E5E8C"       # ブランドカラー（16進。例: "#C8102E"）
+  logo: none                   # ロゴ（none / ファイル名。初期版は枠のみ差し替え）
+
+analysis:
+  primary_kpi: cpa             # 最重視するKPI（例: cpa=応募単価, hires=採用数）
+  avoid_expressions: []        # 使用を避けたい表現（例: [絶対, 必ず成功]）
