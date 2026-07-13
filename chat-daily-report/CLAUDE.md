@@ -40,7 +40,7 @@ Google Docs へ貼り付けられる業務日報を作成する Claude スキル
 | 3 | SKILL.md 作成 | 完了 |
 | 4 | 動作テストと修正(test-results/) | 完了 |
 | 5 | 利用者向けマニュアル(README.md 完成) | 完了 |
-| 6 | Google Docs 連携サンプル(optional-integration/) | 未着手 |
+| 6 | Google Docs 連携サンプル(optional-integration/) | 完了 |
 | 7 | 最終確認・納品準備 | 未着手 |
 
 ## 最終的なフォルダ構成
