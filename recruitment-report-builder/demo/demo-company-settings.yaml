@@ -1,0 +1,60 @@
+# デモ用会社設定（架空企業。実在の企業・人物とは無関係です）
+company:
+  name: 株式会社サンプル採用企画   # 架空
+  department: 採用マーケティング部
+  report_title: 求人媒体 月次結果報告書
+  report_to: 採用責任者
+  frequency: monthly
+  current_period: "2026-06"
+  previous_period: "2026-05"
+
+media:
+  registered:            # 正式名称（媒体マスタ）
+    - Indeed
+    - 求人ボックス
+    - エンゲージ
+  aliases:               # 表記揺れ → 正式名称
+    indeed: Indeed
+    INDEED: Indeed
+    求人BOX: 求人ボックス
+    求人box: 求人ボックス
+    engage: エンゲージ
+    Engage: エンゲージ
+
+kpi:
+  required:              # 必須KPI
+    - applications
+    - cost
+    - cpa
+  optional:
+    - impressions
+    - clicks
+    - ctr
+    - application_rate
+    - interviews
+    - interview_rate
+    - hires
+    - hire_rate
+    - cpc
+    - cph
+
+thresholds:
+  cpa_warning_yen: 50000          # 応募単価がこれを超えたら警告（仮定値）
+  mom_change_warning_pct: 50      # 前月比±50%超で異常値警告（仮定値）
+  good_target_ratio_pct: 100      # 好調: 応募数目標比100%以上
+  good_mom_increase_pct: 20       # 好調: 応募数前月比+20%以上
+  caution_cpa_target_ratio_pct: 120  # 注意: 応募単価が目標の120%以上
+  caution_mom_decrease_pct: -20   # 注意: 応募数前月比-20%以下
+
+report:
+  slides: [cover, executive_summary, main_kpi, by_media, by_job, by_location, best_worst, issues, actions, open_items]
+  tone: です・ます調
+  summary_length: standard        # short / standard / long
+  brand_color: "#2E5E8C"          # 架空のブランドカラー
+  logo: none
+
+analysis:
+  primary_kpi: cpa
+  avoid_expressions:
+    - 絶対
+    - 必ず成功
