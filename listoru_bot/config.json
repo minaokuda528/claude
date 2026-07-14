@@ -1,0 +1,37 @@
+{
+  "base_url": "https://www.listoru814.list1.xyz/main.php",
+  "max_threshold": 2000,
+
+  "wait_after_search_start_sec": 120,
+  "collect_start_retry_max": 3,
+  "collect_start_retry_interval_sec": 120,
+  "initial_wait_before_first_check_sec": 900,
+  "check_interval_sec": 300,
+  "max_wait_total_sec": 3600,
+
+  "download_dir": "downloads",
+  "log_dir": "logs",
+
+  "selectors": {
+    "_comment": "初回の --inspect 実行結果を見て、実サイトのDOMに合わせて調整してください。複数候補を配列で指定でき、上から順に試行されます。",
+    "login_id": ["input[name='id']", "input[name='login_id']", "input[name='user_id']", "input[type='text']"],
+    "login_password": ["input[name='password']", "input[name='pass']", "input[type='password']"],
+    "login_submit": ["button:has-text('ログイン')", "input[type='submit']", "input[type='image']"],
+
+    "menu_reservation_list": ["a:has-text('収集予約一覧')", "text=収集予約一覧（照会）"],
+    "menu_collect": ["a:has-text('収集実行')", "a:has-text('リスト収集')"],
+
+    "reservation_rows": ["table tr:has(input[type='submit'][value*='削除']), table tr:has(button:has-text('削除')), table tr:has(a:has-text('削除'))"],
+    "row_delete_button": ["input[type='submit'][value*='削除']", "button:has-text('削除')", "a:has-text('削除')"],
+
+    "collect_site_select": ["select[name*='site']", "select"],
+    "collect_condition_input": ["input[name*='cond']", "textarea[name*='cond']"],
+    "threshold_input": ["input[name*='max']", "input[name*='limit']", "input[name*='threshold']"],
+    "search_start_button": ["button:has-text('検索開始')", "input[type='submit'][value*='検索開始']"],
+    "collect_start_button": ["button:has-text('収集開始')", "input[type='submit'][value*='収集開始']"],
+    "collecting_indicator": ["text=収集中"],
+    "csv_export_button": ["button:has-text('CSV出力')", "input[type='submit'][value*='CSV出力']", "a:has-text('CSV出力')"],
+    "csv_checkboxes": ["input[type='checkbox']"],
+    "csv_execute_button": ["button:has-text('出力')", "input[type='submit'][value*='出力']"]
+  }
+}

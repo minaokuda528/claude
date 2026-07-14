@@ -1,0 +1,63 @@
+# listoru_bot — リストル収集予約 自動処理
+
+リストル（https://www.listoru814.list1.xyz/main.php）の収集予約一覧（照会）にある予約を
+**下から順番に** 処理する Playwright ベースの自動化スクリプトです。
+
+各予約について: 収集実行（最大収集閾値 2000件）→ CSV出力（全項目チェック）→
+ダウンロード完了確認 → **CSV確認できた予約のみ削除**、を一覧が空になるまで繰り返します。
+
+## 安全原則
+
+- CSVのダウンロード完了（ファイル存在・0KBでない）を確認できない限り、予約は**絶対に削除しない**
+- 収集開始不可・60分タイムアウト・CSV失敗の予約は削除せずスキップし、ログに理由を記録
+- 削除直前に対象行の収集サイト名・収集条件を再照合。同一条件の予約が複数ある場合は一番下の一致行を削除
+- CSVは成功したが削除に失敗した場合は、二重収集を避けるため**停止**して手動確認を促す
+- 収集中は 15分待機 → 5分間隔ポーリング（最大60分）。ボタンの連打はしない
+
+## セットアップ
+
+```bash
+pip install playwright
+# ブラウザが未インストールの環境では: playwright install chromium
+export LISTORU_ID='（ログインID）'
+export LISTORU_PASSWORD='（パスワード）'
+```
+
+認証情報は環境変数でのみ受け取り、ファイルには保存しません。
+
+## 使い方（3段階で安全に）
+
+```bash
+cd listoru_bot
+
+# 1. 画面構造の調査（処理は一切しない）: inspect/ にHTML・スクリーンショットを保存
+python3 listoru_bot.py --inspect
+
+# 2. inspect の結果を見て config.json の selectors と
+#    listoru_bot.py の site_and_condition()（列番号）を実サイトに合わせて調整
+
+# 3. ドライラン（一覧読み取り・設定入力まで。検索開始/収集/削除はしない）
+python3 listoru_bot.py --dry-run
+
+# 4. 本番実行
+python3 listoru_bot.py --run
+```
+
+## 出力
+
+- `downloads/` … ダウンロードしたCSV
+- `logs/run_YYYYMMDD_HHMMSS.log` … 予約ごとの処理記録（指定フォーマット）と最終報告
+- `inspect/` … --inspect 時の画面キャプチャ
+
+## 注意（重要）
+
+**Claude Code のリモート実行環境からは、対象サイトへの接続が
+ネットワークポリシーで拒否されます（プロキシ 403）。**
+このスクリプトを実際に動かすには、次のいずれかが必要です:
+
+1. 環境のネットワーク設定で `www.listoru814.list1.xyz` を許可ドメインに追加する
+   （https://code.claude.com/docs/en/claude-code-on-the-web 参照）
+2. ローカルPCなど、サイトに到達できる環境で実行する
+
+セレクタ（`config.json` の `selectors`）は一般的なフォーム構造を仮定した初期値です。
+初回は必ず `--inspect` → 調整 → `--dry-run` の順で確認してから `--run` してください。
