@@ -1,0 +1,30 @@
+{
+  "period": "2026-05",
+  "period_label": "2026年5月",
+  "department": "エンジニアリング採用",
+  "stages": ["applications", "document_pass", "first_interview", "final_interview", "offers", "accepted"],
+  "stage_labels": {
+    "applications": "応募",
+    "document_pass": "書類選考通過",
+    "first_interview": "一次面接",
+    "final_interview": "最終面接",
+    "offers": "内定",
+    "accepted": "内定承諾（入社）"
+  },
+  "channels": [
+    {"name": "リクナビ",     "applications": 130, "document_pass": 78, "first_interview": 52, "final_interview": 28, "offers": 15, "accepted": 11, "cost": 480000},
+    {"name": "マイナビ",     "applications": 110, "document_pass": 64, "first_interview": 42, "final_interview": 22, "offers": 11, "accepted":  8, "cost": 420000},
+    {"name": "Indeed",       "applications":  88, "document_pass": 49, "first_interview": 31, "final_interview": 16, "offers":  8, "accepted":  6, "cost": 210000},
+    {"name": "リファラル",   "applications":  28, "document_pass": 22, "first_interview": 18, "final_interview": 12, "offers":  8, "accepted":  6, "cost":  60000},
+    {"name": "エージェント", "applications":  38, "document_pass": 30, "first_interview": 23, "final_interview": 13, "offers":  9, "accepted":  7, "cost": 1140000}
+  ],
+  "reported_totals": {
+    "applications": 394,
+    "document_pass": 243,
+    "first_interview": 166,
+    "final_interview": 91,
+    "offers": 51,
+    "accepted": 38,
+    "cost": 2310000
+  }
+}

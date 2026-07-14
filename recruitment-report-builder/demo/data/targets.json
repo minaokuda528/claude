@@ -1,0 +1,19 @@
+{
+  "period": "2026-06",
+  "period_label": "2026年6月",
+  "department": "エンジニアリング採用",
+  "stage_targets": {
+    "applications": 400,
+    "document_pass": 250,
+    "first_interview": 180,
+    "final_interview": 100,
+    "offers": 55,
+    "accepted": 45
+  },
+  "kpi_targets": {
+    "document_pass_rate": 0.60,
+    "offer_acceptance_rate": 0.75,
+    "hires": 45,
+    "cost_per_hire": 55000
+  }
+}
