@@ -30,18 +30,31 @@ export LISTORU_PASSWORD='（パスワード）'
 ```bash
 cd listoru_bot
 
-# 1. 画面構造の調査（処理は一切しない）: inspect/ にHTML・スクリーンショットを保存
+# 1. 画面構造の調査（処理は一切しない）
+#    inspect/ にHTML・スクリーンショットに加え *_fields.txt（入力欄名・selectの選択肢一覧）を保存
 python3 listoru_bot.py --inspect
 
-# 2. inspect の結果を見て config.json の selectors と
+# 2. inspect/*_fields.txt を見て config.json の selectors と
 #    listoru_bot.py の site_and_condition()（列番号）を実サイトに合わせて調整
 
 # 3. ドライラン（一覧読み取り・設定入力まで。検索開始/収集/削除はしない）
 python3 listoru_bot.py --dry-run
 
-# 4. 本番実行
+# 4. まず1件だけ本番実行して全工程（収集→CSV→削除）を検証（クレジット節約）
+python3 listoru_bot.py --run --limit 1
+
+# 5. 問題なければ全件処理
 python3 listoru_bot.py --run
 ```
+
+## コスト（クレジット）を抑える設計
+
+- **`--limit N`**: 最初は `--run --limit 1` で1件だけ通し、パイプライン全体を確認してから全件へ。
+  収集はリストル側のクレジットを消費するため、いきなり全件回して途中失敗するのを防ぐのが最大の節約。
+- **`--inspect` の `*_fields.txt`**: フォーム項目を機械可読で列挙するので、セレクタ調整が1往復で済む。
+- **`state.jsonl`**: 収集完了（CSV取得）と削除完了を追記記録。セッションが落ちて再実行したとき、
+  「CSV取得済みだが削除未完了」の予約を起動時に警告し、**再収集によるクレジットの二重消費を防ぐ**。
+- 収集中のポーリングは 15分待機→5分間隔（最大60分）。再読み込み・ボタン連打をしない。
 
 ## 出力
 

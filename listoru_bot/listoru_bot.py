@@ -90,14 +90,16 @@ class Logger:
 
 
 class ListoruBot:
-    def __init__(self, config: dict, logger: Logger, mode: str):
+    def __init__(self, config: dict, logger: Logger, mode: str, limit: int = 0):
         self.cfg = config
         self.log = logger
         self.mode = mode  # inspect / dry-run / run
+        self.limit = limit  # 0=無制限
         self.sel = config["selectors"]
         self.download_dir = BASE_DIR / config["download_dir"]
         self.download_dir.mkdir(parents=True, exist_ok=True)
         self.inspect_dir = BASE_DIR / "inspect"
+        self.state_path = BASE_DIR / "state.jsonl"
         self.user_id = os.environ.get("LISTORU_ID", "")
         self.password = os.environ.get("LISTORU_PASSWORD", "")
         if not self.user_id or not self.password:
@@ -119,11 +121,74 @@ class ListoruBot:
                 continue
         return None
 
+    def mark_state(self, event, site, condition, csv_file=""):
+        """収集済み/削除済みを追記記録。セッションが落ちても再収集（＝クレジット再消費）を避けるための痕跡"""
+        rec = {"ts": now(), "event": event, "site": site, "condition": condition, "csv_file": csv_file}
+        with open(self.state_path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+
+    def warn_pending_from_state(self):
+        """前回CSV取得済みだが削除未完了の予約があれば警告（クラッシュ後の再収集＝クレジット無駄を防ぐ）"""
+        if not self.state_path.exists():
+            return
+        done, deleted = {}, set()
+        for ln in self.state_path.read_text(encoding="utf-8").splitlines():
+            if not ln.strip():
+                continue
+            r = json.loads(ln)
+            key = (r["site"], r["condition"])
+            if r["event"] == "csv_done":
+                done[key] = r.get("csv_file", "")
+            elif r["event"] == "deleted":
+                deleted.add(key)
+        pending = {k: v for k, v in done.items() if k not in deleted}
+        if pending:
+            self.log.line("⚠ 前回CSV取得済みだが削除が確認できていない予約があります。"
+                          "再収集でクレジットを無駄にしないため、以下は手動で削除済みか確認してください:")
+            for (s, c), f in pending.items():
+                self.log.line(f"    - {s} / {c} (CSV: {f})")
+
     def snapshot(self, page, name):
         self.inspect_dir.mkdir(parents=True, exist_ok=True)
         page.screenshot(path=str(self.inspect_dir / f"{name}.png"), full_page=True)
         (self.inspect_dir / f"{name}.html").write_text(page.content(), encoding="utf-8")
-        self.log.line(f"画面保存: inspect/{name}.png / .html")
+        self.dump_fields(page, name)
+        self.log.line(f"画面保存: inspect/{name}.png / .html / _fields.txt")
+
+    def dump_fields(self, page, name):
+        """フォームの入力欄・ボタン・selectの選択肢を列挙し、セレクタ調整を1往復で終わらせる"""
+        self.inspect_dir.mkdir(parents=True, exist_ok=True)
+        info = page.evaluate(
+            """() => {
+              const out = [];
+              for (const el of document.querySelectorAll('input,select,textarea,button,a')) {
+                const tag = el.tagName.toLowerCase();
+                let label = (el.getAttribute('value') || el.textContent || '').trim().slice(0, 40);
+                const rec = {
+                  tag,
+                  type: el.getAttribute('type') || '',
+                  name: el.getAttribute('name') || '',
+                  id: el.getAttribute('id') || '',
+                  label,
+                };
+                if (tag === 'select') {
+                  rec.options = Array.from(el.options).map(o => o.textContent.trim()).slice(0, 30);
+                }
+                if (tag === 'a') { rec.href = (el.getAttribute('href') || '').slice(0, 60); }
+                out.push(rec);
+              }
+              return out;
+            }"""
+        )
+        lines = [f"# {name} — フォーム要素一覧 ({now()})", ""]
+        for r in info:
+            base = f"<{r['tag']}> type={r['type']!r} name={r['name']!r} id={r['id']!r} label={r['label']!r}"
+            if r.get("href"):
+                base += f" href={r['href']!r}"
+            lines.append(base)
+            if r.get("options"):
+                lines.append("    options: " + " | ".join(r["options"]))
+        (self.inspect_dir / f"{name}_fields.txt").write_text("\n".join(lines), encoding="utf-8")
 
     # ---------- 画面操作 ----------
 
@@ -268,10 +333,13 @@ class ListoruBot:
                 raise RuntimeError(f"CSVファイルが0KBです: {fname}")
             rec["csv"] = "成功"
             rec["csv_file"] = fname
+            self.mark_state("csv_done", site, condition, fname)
             self.log.line(f"#{no} CSVダウンロード完了: {fname} ({dest.stat().st_size} bytes)")
 
             # 削除: CSV確認済みの場合のみ
             self.delete_reservation(page, no, site, condition, rec)
+            if rec.get("delete") == "成功":
+                self.mark_state("deleted", site, condition, fname)
 
         except Exception as e:
             rec.setdefault("note", "")
@@ -338,6 +406,7 @@ class ListoruBot:
                 browser.close()
                 return
 
+            self.warn_pending_from_state()
             no = 0
             skipped = {}  # (site, condition) -> この実行内でスキップした件数
             while True:
@@ -373,6 +442,9 @@ class ListoruBot:
                     key = (site, condition)
                     skipped[key] = skipped.get(key, 0) + 1
                     self.log.line("この予約は削除せずスキップし、次の予約へ進みます")
+                if self.limit and no >= self.limit:
+                    self.log.line(f"--limit {self.limit} に到達したため処理を終了します")
+                    break
             browser.close()
             print("\n" + self.log.final_report())
 
@@ -383,13 +455,15 @@ def main():
     g.add_argument("--inspect", action="store_true", help="画面構造の調査のみ")
     g.add_argument("--dry-run", action="store_true", help="読み取り・照合のみ（収集/削除しない）")
     g.add_argument("--run", action="store_true", help="本番実行")
+    ap.add_argument("--limit", type=int, default=0,
+                    help="処理する予約の最大件数（0=無制限）。まず --run --limit 1 で全工程を検証することを推奨")
     args = ap.parse_args()
     mode = "inspect" if args.inspect else ("dry-run" if args.dry_run else "run")
 
     config = json.loads((BASE_DIR / "config.json").read_text(encoding="utf-8"))
     logger = Logger(BASE_DIR / config["log_dir"])
-    logger.line(f"=== listoru_bot 開始 (mode={mode}) ===")
-    ListoruBot(config, logger, mode).run()
+    logger.line(f"=== listoru_bot 開始 (mode={mode}, limit={args.limit or '無制限'}) ===")
+    ListoruBot(config, logger, mode, limit=args.limit).run()
 
 
 if __name__ == "__main__":
