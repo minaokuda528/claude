@@ -19,7 +19,17 @@
  * 2026-07-14更新
  * - 受託制作ターゲット（業界カテゴリ）ごとの件名・本文を最新版に全面差し替え
  *   （全18カテゴリ＝17業界＋汎用版。ターゲット名・分岐ロジックは従来どおり）
+ *
+ * 2026-07-14更新（別スクリプト共存対応）
+ * - 全体を名前空間 LoveCharaSalesMail（即時関数）で包み、グローバル定数の衝突を解消。
+ *   これにより同じプロジェクト内に別のスクリプト（例：フォームエラー処理）が
+ *   同名の const を宣言していても「already been declared」エラーが起きない。
+ * - トリガー・メニューから呼ぶ入口関数だけを lcMail_ 接頭辞のグローバル関数として公開。
+ * - onOpen だけは Apps Script の仕様上グローバルである必要があるため、
+ *   末尾に onOpen() を用意（他ファイルに onOpen がある場合は後述の注意点を参照）。
  */
+
+var LoveCharaSalesMail = (function () {
 
 const SCRIPT_VERSION = '2026-07-14';
 
@@ -548,21 +558,23 @@ https://lovecharacter64.jp/quiz`
 ];
 
 /**
- * スプレッドシートを開いたときにメニューを追加
+ * スプレッドシートを開いたときに追加するメニューを構築する。
+ * 実際の onOpen（グローバル）から呼び出される。
+ * addItem に渡す関数名は、末尾で公開しているグローバル入口（lcMail_ 接頭辞）を指す。
  */
-function onOpen() {
+function buildMenu() {
   SpreadsheetApp.getUi()
     .createMenu('ラブキャラ営業メール')
-    .addItem('対象スプシ・対象件数を確認する', 'debugCheckTargetSpreadsheet')
-    .addItem('書き込みテストをする', 'testWriteToSheet')
+    .addItem('対象スプシ・対象件数を確認する', 'lcMail_debugCheckTargetSpreadsheet')
+    .addItem('書き込みテストをする', 'lcMail_testWriteToSheet')
     .addSeparator()
-    .addItem('下書きを作成する', 'manualCreateDraftsForAllSheets')
-    .addItem('送信済みを確認する', 'manualCheckSentEmailsForAllSheets')
+    .addItem('下書きを作成する', 'lcMail_manualCreateDraftsForAllSheets')
+    .addItem('送信済みを確認する', 'lcMail_manualCheckSentEmailsForAllSheets')
     .addSeparator()
-    .addItem('下書き作成中を未対応に戻す', 'resetProcessingRows')
+    .addItem('下書き作成中を未対応に戻す', 'lcMail_resetProcessingRows')
     .addSeparator()
-    .addItem('毎日実行トリガーを設定する', 'createDailyTriggers')
-    .addItem('毎日実行トリガーを削除する', 'deleteDailyTriggers')
+    .addItem('毎日実行トリガーを設定する', 'lcMail_createDailyTriggers')
+    .addItem('毎日実行トリガーを削除する', 'lcMail_deleteDailyTriggers')
     .addToUi();
 }
 
@@ -1049,13 +1061,13 @@ function testWriteToSheet() {
 function createDailyTriggers() {
   deleteDailyTriggers();
 
-  ScriptApp.newTrigger('scheduledCreateDraftsForAllSheets')
+  ScriptApp.newTrigger('lcMail_scheduledCreateDraftsForAllSheets')
     .timeBased()
     .everyDays(1)
     .atHour(9)
     .create();
 
-  ScriptApp.newTrigger('scheduledCheckSentEmailsForAllSheets')
+  ScriptApp.newTrigger('lcMail_scheduledCheckSentEmailsForAllSheets')
     .timeBased()
     .everyDays(1)
     .atHour(7)
@@ -1068,8 +1080,8 @@ function createDailyTriggers() {
 
 function deleteDailyTriggers() {
   const targetFunctions = [
-    'scheduledCreateDraftsForAllSheets',
-    'scheduledCheckSentEmailsForAllSheets'
+    'lcMail_scheduledCreateDraftsForAllSheets',
+    'lcMail_scheduledCheckSentEmailsForAllSheets'
   ];
 
   ScriptApp.getProjectTriggers().forEach(trigger => {
@@ -1185,4 +1197,74 @@ function showMessage(message) {
   } catch (e) {
     Logger.log(message);
   }
+}
+
+// ===== 名前空間の公開（内部関数を外から呼べるようにする） =====
+return {
+  buildMenu: buildMenu,
+  manualCreateDraftsForAllSheets: manualCreateDraftsForAllSheets,
+  scheduledCreateDraftsForAllSheets: scheduledCreateDraftsForAllSheets,
+  manualCheckSentEmailsForAllSheets: manualCheckSentEmailsForAllSheets,
+  scheduledCheckSentEmailsForAllSheets: scheduledCheckSentEmailsForAllSheets,
+  resetProcessingRows: resetProcessingRows,
+  debugCheckTargetSpreadsheet: debugCheckTargetSpreadsheet,
+  testWriteToSheet: testWriteToSheet,
+  createDailyTriggers: createDailyTriggers,
+  deleteDailyTriggers: deleteDailyTriggers
+};
+
+})();
+
+/************************************************************************
+ * グローバル入口（トリガー・メニュー・onOpen から呼ばれる）
+ *
+ * ・トリガーやメニューの addItem は「グローバル関数名の文字列」しか指定できないため、
+ *   固有接頭辞 lcMail_ を付けた薄いラッパー関数として公開する。
+ * ・これらの名前は他スクリプトと重複しにくいので同居しても衝突しない。
+ *
+ * 【onOpen の注意】
+ *   onOpen は Apps Script の仕様上グローバルで、かつ名前が onOpen である必要がある。
+ *   もし同じプロジェクトの別ファイルにも onOpen がある場合は、どちらか一方しか
+ *   実行されない（後勝ち）。その場合はこの onOpen を削除し、既存の onOpen の中に
+ *   「LoveCharaSalesMail.buildMenu();」の1行を追記してください。
+ ************************************************************************/
+function onOpen() {
+  LoveCharaSalesMail.buildMenu();
+}
+
+function lcMail_debugCheckTargetSpreadsheet() {
+  LoveCharaSalesMail.debugCheckTargetSpreadsheet();
+}
+
+function lcMail_testWriteToSheet() {
+  LoveCharaSalesMail.testWriteToSheet();
+}
+
+function lcMail_manualCreateDraftsForAllSheets() {
+  LoveCharaSalesMail.manualCreateDraftsForAllSheets();
+}
+
+function lcMail_manualCheckSentEmailsForAllSheets() {
+  LoveCharaSalesMail.manualCheckSentEmailsForAllSheets();
+}
+
+function lcMail_resetProcessingRows() {
+  LoveCharaSalesMail.resetProcessingRows();
+}
+
+function lcMail_createDailyTriggers() {
+  LoveCharaSalesMail.createDailyTriggers();
+}
+
+function lcMail_deleteDailyTriggers() {
+  LoveCharaSalesMail.deleteDailyTriggers();
+}
+
+// 毎日実行トリガーから呼ばれる（createDailyTriggers がこの名前で登録する）
+function lcMail_scheduledCreateDraftsForAllSheets() {
+  LoveCharaSalesMail.scheduledCreateDraftsForAllSheets();
+}
+
+function lcMail_scheduledCheckSentEmailsForAllSheets() {
+  LoveCharaSalesMail.scheduledCheckSentEmailsForAllSheets();
 }
