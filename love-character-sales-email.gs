@@ -1229,7 +1229,14 @@ return {
  *   「LoveCharaSalesMail.buildMenu();」の1行を追記してください。
  ************************************************************************/
 function onOpen() {
-  LoveCharaSalesMail.buildMenu();
+  // onOpen はスプレッドシートを開いた瞬間に自動実行される関数。
+  // エディタから手動実行すると UI コンテキストが無く getUi() が失敗するため、
+  // その場合はエラーにせずログに残すだけにする（メニューは開いたときに自動で付く）。
+  try {
+    LoveCharaSalesMail.buildMenu();
+  } catch (e) {
+    Logger.log('onOpen（メニュー追加）はスプレッドシートを開いたときに自動実行されます。手動実行では追加されません: ' + e.message);
+  }
 }
 
 function lcMail_debugCheckTargetSpreadsheet() {
