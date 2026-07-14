@@ -78,7 +78,7 @@ const DEFAULT_TEMPLATE_TARGET = 'その他の業界（汎用版）';
 const EMBEDDED_TEMPLATE_ROWS = [
   {
     target: 'D2C/EC 食品・美容・アパレル',
-    subject: '広告費ゼロで300万PV — 診断で御社ECの初回購入を伸ばすご提案',
+    subject: '広告費ゼロで累計8,000万回 — 診断で御社ECの初回購入を伸ばすご提案',
     body: `ご担当者様
 
 はじめてご連絡いたします。
